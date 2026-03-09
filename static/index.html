@@ -1,0 +1,2882 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClinAssist - Voice Clinical Intake</title>
+    <style>
+        :root {
+            --bg-top: #f4f8ff;
+            --bg-bottom: #edf3ff;
+            --surface: rgba(255, 255, 255, 0.96);
+            --surface-soft: #f8fbff;
+            --border: #dbe7ff;
+            --border-strong: #c7dbff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --brand: #2563eb;
+            --brand-dark: #1d4ed8;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-sm: 0 2px 10px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 16px 36px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.14), transparent 40%),
+                radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.1), transparent 35%),
+                linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 1rem 1rem 5.5rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(3px);
+            padding: 2.25rem;
+            min-height: calc(100vh - 5.5rem);
+            animation: fadeIn 0.5s ease-in;
+            transition: box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .brand-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-bottom: 1rem;
+            padding: 0.85rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #ffffff 0%, #f5f9ff 100%);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .brand-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
+            color: #fff;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+        }
+
+        .brand-logo svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .brand-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.12rem;
+        }
+
+        .brand-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #163f8f;
+            letter-spacing: 0.01em;
+        }
+
+        .brand-subtitle {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header {
+            margin-bottom: 1.5rem;
+            padding: 2.1rem;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, #ffffff 0%, #f4f8ff 100%);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Top Level Tabs */
+        .main-tabs {
+            display: flex;
+            background: #f1f5ff;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+
+        .main-tab {
+            flex: 1;
+            padding: 0.95rem;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .tab-icon {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.85;
+        }
+
+        .main-tab.active {
+            color: var(--brand);
+            background: #eaf2ff;
+            border-bottom-color: var(--brand);
+        }
+
+        .main-tab:hover:not(.active) {
+            background: #eef2ff;
+        }
+
+        .view-content {
+            display: block;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(10px);
+            visibility: hidden;
+            pointer-events: none;
+            height: 0;
+            overflow: hidden;
+            transition: opacity 320ms ease, transform 320ms ease;
+        }
+
+        .view-content.active {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+            pointer-events: auto;
+            height: auto;
+            overflow: visible;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.55rem;
+        }
+
+        .header-actions {
+            position: static;
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+            align-items: center;
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
+        .header-actions .btn-pill,
+        .header-actions .status-chip {
+            width: auto;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .header-actions .btn-pill {
+            min-height: auto;
+            padding: 0.55rem 0.95rem;
+            border-radius: 10px;
+            font-size: 0.84rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.36rem;
+        }
+
+        .btn-icon {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .header-actions .btn-pill:hover {
+            background: #edf3ff;
+            color: var(--brand);
+        }
+
+        .header-actions .status-chip {
+            margin-top: 0;
+            white-space: nowrap;
+            font-size: 0.76rem;
+        }
+
+        .header-actions .status-chip .status-dot {
+            flex-shrink: 0;
+        }
+
+        .sidebar-history-title {
+            display: none;
+        }
+
+        .sidebar-history-list {
+            display: none;
+        }
+
+        .sidebar-history-item {
+            padding: 0.7rem;
+            border-radius: 10px;
+            border: 1px solid #1f2937;
+            background: #111827;
+            margin-bottom: 0.55rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sidebar-history-item:hover {
+            border-color: #334155;
+            background: #0f172a;
+        }
+
+        .sidebar-history-item.active {
+            border-color: #2563eb;
+            background: #172554;
+            box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.25);
+        }
+
+        .sidebar-history-date {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            margin-bottom: 0.2rem;
+        }
+
+        .sidebar-history-complaint {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-history-meta {
+            font-size: 0.68rem;
+            color: #64748b;
+            margin-top: 0.2rem;
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: #1e3a8a;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 999px;
+            padding: 0.3rem 0.58rem;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #3b82f6;
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35);
+        }
+
+        .status-chip.status-ready {
+            color: #155e75;
+            background: #ecfeff;
+            border-color: #bae6fd;
+        }
+
+        .status-chip.status-ready .status-dot {
+            background: #06b6d4;
+        }
+
+        .status-chip.status-listening {
+            color: #991b1b;
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .status-chip.status-listening .status-dot {
+            background: #ef4444;
+            animation: statusPulse 1.2s infinite;
+        }
+
+        .status-chip.status-processing {
+            color: #78350f;
+            background: #fffbeb;
+            border-color: #fde68a;
+        }
+
+        .status-chip.status-processing .status-dot {
+            background: #f59e0b;
+            animation: statusPulse 1.2s infinite;
+        }
+
+        .status-chip.status-speaking {
+            color: #1e40af;
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .status-chip.status-speaking .status-dot {
+            background: #2563eb;
+            animation: statusPulse 1.2s infinite;
+        }
+
+        @keyframes statusPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+            }
+        }
+
+        h1 {
+            font-size: 2.05rem;
+            font-weight: 700;
+            color: #163f8f;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 0.98rem;
+            color: #2558c8;
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+        }
+
+        .disclaimer {
+            font-size: 0.875rem;
+            color: #334155;
+            line-height: 1.6;
+            max-width: 760px;
+        }
+
+        .session-control {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0b57d0 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 0.78rem 1.45rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.26);
+            transform: translateY(-0.5px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            background: #D1D5DB;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .chat-container {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .chat-container.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+        }
+
+        .chat-container.processing {
+            border-color: #bfdbfe;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .messages {
+            flex-grow: 1;
+            min-height: 380px;
+            overflow-y: auto;
+            margin-bottom: 1.35rem;
+            padding: 1.1rem;
+            background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+            border: 1px solid #e5ecf8;
+            border-radius: 14px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 1rem;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 78%;
+            padding: 0.82rem 1rem;
+            border-radius: 12px;
+            line-height: 1.55;
+            font-size: 0.9rem;
+            border: 1px solid transparent;
+        }
+
+        .message.assistant .message-bubble {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #e2e8f0;
+            border-bottom-left-radius: 6px;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #0b57d0 0%, #2563eb 100%);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            margin-bottom: 1.1rem;
+            padding-top: 0.25rem;
+        }
+
+        .mic-button {
+            width: 66px;
+            height: 66px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #0b57d0 0%, #1d4ed8 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.28);
+            transition: all 0.3s ease;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.32);
+        }
+
+        .mic-button:active {
+            transform: scale(0.98);
+        }
+
+        .mic-button.recording {
+            background: #EF4444;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 12px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .mic-icon {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .text-input-container {
+            display: flex;
+            gap: 0.75rem;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in 0.3s forwards;
+        }
+
+        .text-input {
+            flex: 1;
+            padding: 0.82rem 1rem;
+            border: 1px solid #c7d6ec;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #ffffff;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .btn-send {
+            padding: 0.82rem 1.2rem;
+            background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+            transition: all 0.2s ease;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
+        }
+
+        .btn-audio-toggle {
+            padding: 0.82rem;
+            background: #ffffff;
+            color: #475569;
+            border: 1px solid #c7d6ec;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-audio-toggle:hover {
+            background: #f1f5f9;
+            color: var(--brand);
+            border-color: #94a3b8;
+        }
+
+        .btn-audio-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .doubt-buttons-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .btn-doubt-yes {
+            background-color: var(--brand);
+            color: white;
+            padding: 0.82rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-doubt-yes:hover {
+            background-color: var(--brand-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-doubt-no {
+            background-color: #f1f5f9;
+            color: #475569;
+            padding: 0.82rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s ease;
+        }
+
+        .btn-doubt-no:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+            transform: translateY(-1px);
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 0.42rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .risk-badge.LOW {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .risk-badge.MODERATE {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .risk-badge.HIGH {
+            background: #FED7AA;
+            color: #9A3412;
+        }
+
+        .risk-badge.CRITICAL {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .export-section {
+            display: none;
+            text-align: center;
+            padding-top: 1.15rem;
+            border-top: 1px solid #e2e8f0;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .export-section.active {
+            display: block;
+        }
+
+        .btn-export {
+            padding: 0.72rem 1.25rem;
+            background: transparent;
+            color: var(--brand-dark);
+            border: 2px solid var(--brand);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-export:hover {
+            background: var(--brand);
+            color: white;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #475569;
+            font-size: 0.84rem;
+            margin: 1rem 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots span {
+            animation: blink 1.4s infinite;
+            display: inline-block;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+
+            0%,
+            60%,
+            100% {
+                opacity: 1;
+            }
+
+            30% {
+                opacity: 0.3;
+            }
+        }
+
+        footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.96);
+            border-top: 1px solid #dbeafe;
+            padding: 0.75rem 1rem;
+            text-align: center;
+            color: #334155;
+            font-size: 0.8rem;
+            font-weight: 400;
+        }
+
+        /* Scrollbar styling */
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #bfdbfe;
+            border-radius: 3px;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #93c5fd;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+                border-radius: 18px;
+            }
+
+            body {
+                padding: 0 0 5.5rem;
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.65rem;
+            }
+
+            .brand-bar {
+                padding: 0.75rem 0.85rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .header-actions {
+                width: auto;
+                padding: 0;
+                gap: 0.4rem;
+                flex-wrap: wrap;
+            }
+
+            header {
+                padding: 1.25rem;
+            }
+
+            h1 {
+                font-size: 1.7rem;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+
+            .session-control {
+                justify-content: stretch;
+            }
+
+            .btn-primary {
+                width: 100%;
+            }
+
+            .history-sidebar {
+                width: min(92vw, 320px);
+                left: calc(-1 * min(92vw, 320px));
+            }
+        }
+
+        /* New styles for interactive blocks */
+        .wellness-tip {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            animation: slideUp 0.3s ease-out;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .wellness-tip svg {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            fill: #22c55e;
+        }
+
+        .action-block {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .btn-pill {
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #c6d5ea;
+            background: #ffffff;
+            color: #3f4f67;
+        }
+
+        .btn-pill:hover {
+            border-color: var(--brand);
+            color: var(--brand);
+            background: #edf3ff;
+        }
+
+        .btn-pill.primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .btn-pill.primary:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 980px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            animation: modalScale 0.3s ease-out;
+        }
+
+        @keyframes modalScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            color: #1e293b;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #64748b;
+            padding: 0.5rem;
+            display: flex;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            white-space: normal;
+            font-family: inherit;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #334155;
+            background: #f3f6fb;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* History Sidebar Styles */
+        .history-sidebar {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 320px;
+            height: 100%;
+            background: #ffffff;
+            box-shadow: 14px 0 36px rgba(15, 23, 42, 0.14);
+            border-right: 1px solid var(--border);
+            z-index: 1100;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-sidebar.active {
+            left: 0;
+        }
+
+        .history-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface-soft);
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .history-item {
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: #3b82f6;
+            background: #f0f7ff;
+        }
+
+        .history-item.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+        }
+
+        .history-date {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+        }
+
+        .history-complaint {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 2rem;
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .btn-delete-session {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .history-item:hover .btn-delete-session {
+            opacity: 1;
+        }
+
+        .btn-delete-session:hover {
+            color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .history-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(2px);
+            z-index: 1050;
+        }
+
+        .history-overlay.active {
+            display: block;
+        }
+
+        /* Report Styles */
+        .report-header {
+            text-align: center;
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #3b82f6;
+        }
+
+        .report-header h1 {
+            color: #1e3a8a;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            /* 2 columns by default */
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-grid.three-col {
+            grid-template-columns: repeat(3, 1fr);
+            /* 3 columns for wider details */
+        }
+
+        .report-box {
+            background: #ffffff;
+            border: 1px solid #dbe7ff;
+            border-radius: 0;
+            padding: 1rem;
+        }
+
+        /* Health Assistant Chat Styles */
+        .assistant-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+        }
+
+        .assistant-messages {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            min-height: 300px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid #e2e8f0;
+            overflow-y: auto;
+        }
+
+        .assistant-msg {
+            max-width: 85%;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .assistant-msg.user {
+            align-self: flex-end;
+            background: #2563eb;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .assistant-msg.bot {
+            align-self: flex-start;
+            background: white;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            white-space: pre-line;
+        }
+
+        .assistant-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .assistant-input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .assistant-input:focus {
+            border-color: #2563eb;
+        }
+
+        .btn-qa {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-qa:hover {
+            background: #1d4ed8;
+        }
+
+        .assistant-placeholder {
+            text-align: center;
+            color: #64748b;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        /* Enhanced Report Details */
+        .report-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin: 1.5rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .hpi-block {
+            background: #fff;
+            padding: 1.5rem;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-radius: 0 12px 12px 0;
+        }
+
+        .report-box.full-width {
+            grid-column: span 2;
+        }
+
+        .report-box h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .report-content {
+            font-size: 0.95rem;
+            color: #0f172a;
+            line-height: 1.5;
+        }
+
+        .report-risk {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .report-risk.LOW {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .report-risk.MODERATE {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .report-risk.HIGH {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .report-risk.CRITICAL {
+            background: #7f1d1d;
+            color: #ffffff;
+        }
+
+        @media (max-width: 640px) {
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-box.full-width {
+                grid-column: span 1;
+            }
+        }
+
+        .latency-dashboard {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 10px 15px;
+            color: #94a3b8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            gap: 15px;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+            pointer-events: auto;
+        }
+
+        .latency-dashboard:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+
+        .latency-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .latency-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+
+        .latency-value {
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        .latency-value.cached {
+            color: #4ade80;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+
+<body>
+    <div class="latency-dashboard" id="latencyDashboard">
+        <div class="latency-item">
+            <span class="latency-label">STT</span>
+            <span class="latency-value" id="sttLatency">--</span>
+        </div>
+        <div class="latency-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+            <span class="latency-label">LLM</span>
+            <span class="latency-value" id="llmLatency">--</span>
+        </div>
+        <div class="latency-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+            <span class="latency-label">TTS</span>
+            <span class="latency-value" id="ttsLatency">--</span>
+        </div>
+        <div class="latency-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+            <span class="latency-label">Total</span>
+            <span class="latency-value" id="totalLatency">--</span>
+        </div>
+    </div>
+    <div class="container">
+        <div class="brand-bar">
+            <div class="brand-logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 21s7-4.2 7-10V6l-7-3-7 3v5c0 5.8 7 10 7 10z"></path>
+                    <path d="M9.5 12.5l1.8 1.8 3.2-3.2"></path>
+                </svg>
+            </div>
+            <div class="brand-meta">
+                <div class="brand-title">ClinAssist Platform</div>
+                <div class="brand-subtitle">Clinical Intake + Health Consult Workspace</div>
+            </div>
+        </div>
+
+        <div class="main-tabs">
+            <button class="main-tab active" id="tab-intake" onclick="switchMainTab('intake')">
+                <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 12h16"></path>
+                    <path d="M12 4v16"></path>
+                </svg>
+                <span>ClinAssist (Symptom Check)</span>
+            </button>
+            <button class="main-tab" id="tab-consult" onclick="switchMainTab('consult')">
+                <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>Health Consult (Q&A)</span>
+            </button>
+        </div>
+
+        <header>
+            <div class="header-top">
+                <h1 id="appTitle">ClinAssist</h1>
+                <div id="headerActions" class="header-actions">
+                    <button class="btn-pill" onclick="startSession()" title="Start New Session">
+                        <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 5v14"></path>
+                            <path d="M5 12h14"></path>
+                        </svg>
+                        <span>New</span>
+                    </button>
+                    <button class="btn-pill" onclick="toggleHistory()" title="View History">
+                        <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 12a9 9 0 1 0 9-9"></path>
+                            <path d="M3 3v6h6"></path>
+                        </svg>
+                        <span>History</span>
+                    </button>
+                    <div class="status-chip status-ready" id="statusChip" aria-live="polite">
+                        <span class="status-dot"></span>
+                        <span id="statusText">Ready</span>
+                    </div>
+                </div>
+            </div>
+            <p class="hero-subtitle" id="appSubtitle">Clinical intake assistant for structured symptom capture</p>
+            <p id="sessionIdDisplay"
+                style="font-size: 0.75rem; color: #64748b; margin: 0.25rem 0 0.5rem 0; font-family: monospace;">No
+                active session</p>
+            <p class="disclaimer" id="appDisclaimer" style="margin-top: 0.5rem;">A structured pre-screening support tool
+                designed to
+                organize symptoms before a doctor visit.</p>
+        </header>
+
+        <!-- VIEW: CLINASSIST INTAKE -->
+        <div id="view-intake" class="view-content active">
+            <div class="chat-container active" id="chatContainer">
+                <div
+                    style="background: #eff6ff; padding: 1rem; border-radius: 12px; margin-bottom: 1rem; color: #1e3a8a; font-size: 0.9rem; border: 1px solid #bfdbfe;">
+                    <strong>ClinAssist:</strong> Speak or type your symptoms below. I will ask questions to prepare a
+                    structured clinical summary for your doctor visit.
+                </div>
+                <div id="riskBadgeContainer"></div>
+
+                <div class="messages" id="messages"></div>
+
+                <div class="loading" id="loading">
+                    <div class="loading-dots">
+                        <span>●</span>
+                        <span>●</span>
+                        <span>●</span>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <button class="mic-button" id="micBtn" onclick="toggleMic()">
+                        <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                            <path
+                                d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                        </svg>
+                    </button>
+
+                    <div class="doubt-buttons-container" id="consultDoubtButtons" style="display: none;">
+                        <button class="btn-doubt-yes" onclick="sendText('Yes, I have doubt')">Yes, I have a
+                            doubt</button>
+                        <button class="btn-doubt-no" onclick="sendText('No, show the report')">No, show the
+                            report</button>
+                    </div>
+
+                    <div class="text-input-container" id="intakeInputContainer">
+                        <input type="text" class="text-input" id="textInput" placeholder="Enter your symptoms..." />
+                        <button class="btn-audio-toggle" id="audioToggleBtn" onclick="toggleAudio()"
+                            title="Pause/Play Assistant Speech" style="display: none;">
+                            <svg viewBox="0 0 24 24" class="icon-pause" id="iconPause">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                            <svg viewBox="0 0 24 24" class="icon-play" id="iconPlay" style="display: none;">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </button>
+                        <button class="btn-send" onclick="sendText()">Send</button>
+                    </div>
+                </div>
+
+                <div class="export-section" id="exportSection">
+                    <button class="btn-export" onclick="viewSummaryReport()">Clinical Report</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: HEALTH CONSULT -->
+        <div id="view-consult" class="view-content">
+            <div class="chat-container active">
+                <div
+                    style="background: #eff6ff; padding: 1rem; border-radius: 12px; margin-bottom: 1rem; color: #1e3a8a; font-size: 0.9rem; border: 1px solid #bfdbfe;">
+                    <strong>Health Consult:</strong> Ask general questions about health, fitness, diet, or care tips. I
+                    can provide general information, but I cannot diagnose conditions or prescribe medications.
+                </div>
+
+                <div class="assistant-messages" id="consultMessages">
+                </div>
+
+                <div class="loading" id="consultLoading" style="margin: 0.5rem 0;">
+                    <div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>
+                </div>
+
+                <div class="input-area" style="margin-top: 1rem;">
+                    <!-- Consult Mic Button -->
+                    <button class="mic-button" id="consultMicBtn" onclick="toggleConsultMic()">
+                        <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                            <path
+                                d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                        </svg>
+                    </button>
+                    <!-- End Consult Mic Button -->
+
+                    <div class="text-input-container">
+                        <input type="text" class="assistant-input" id="consultInput"
+                            placeholder="Ask a health question (e.g., fitness tips, care advice)...">
+                        <button class="btn-audio-toggle" id="consultAudioToggleBtn" onclick="toggleAudio()"
+                            title="Pause/Play Assistant Speech" style="display: none;">
+                            <svg viewBox="0 0 24 24" class="icon-pause" id="iconConsultPause">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                            <svg viewBox="0 0 24 24" class="icon-play" id="iconConsultPlay" style="display: none;">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </button>
+                        <button class="btn-send" onclick="sendConsult()">Ask</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        ClinAssist does not provide treatment advice. Please consult a licensed doctor.
+    </footer>
+
+    <div class="modal-overlay" id="summaryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Clinical Summary Report</h2>
+                <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+                    <button class="btn-pill primary" id="dlReportBtn" onclick="downloadReportAsImage()">Download
+                        Report</button>
+                    <button class="close-modal" onclick="closeModal()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div id="content-report" class="tab-content active" style="max-height: 70vh;">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-pill" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="history-overlay" id="historyOverlay" onclick="toggleHistory()"></div>
+    <div class="history-sidebar" id="historySidebar">
+        <div class="history-header">
+            <h3 id="historyTitle" style="margin: 0; font-size: 1.1rem;">Session History</h3>
+            <button class="close-modal" onclick="toggleHistory()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="history-list" id="historyList">
+            <div style="text-align: center; color: #64748b; padding: 2rem;">Loading history...</div>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = null;
+        let consultSessionId = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let audioContext = null;
+        let autoplayBlockedNoticeShown = false;
+        let isVoiceMode = false;
+        let inheritIntakeContext = false;
+        let hasConversationStarted = false;
+
+        // Global Audio Playback State
+        let currentHTMLAudio = null;
+        let isAudioPaused = false;
+        let isSynthPaused = false;
+
+        function getActiveTabType() {
+            return document.getElementById('tab-consult').classList.contains('active') ? 'consult' : 'intake';
+        }
+
+        function updateSessionDisplay() {
+            const sessionDisplay = document.getElementById('sessionIdDisplay');
+            if (!sessionDisplay) return;
+
+            const isConsult = getActiveTabType() === 'consult';
+            const activeSessionId = isConsult ? consultSessionId : sessionId;
+            const label = isConsult ? 'Health Consult' : 'ClinAssist';
+            sessionDisplay.textContent = activeSessionId ? `Active ${label} Session: ${activeSessionId}` : `No active ${label} session`;
+        }
+
+        function toggleHistory() {
+            const sidebar = document.getElementById('historySidebar');
+            const overlay = document.getElementById('historyOverlay');
+            const isActive = sidebar.classList.contains('active');
+
+            if (!isActive) {
+                loadHistory();
+            }
+
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        async function loadHistory() {
+            const list = document.getElementById('historyList');
+            if (!list) return;
+            const sessionType = getActiveTabType();
+            const activeSessionId = sessionType === 'consult' ? consultSessionId : sessionId;
+            const historyTitle = document.getElementById('historyTitle');
+            if (historyTitle) {
+                historyTitle.textContent = sessionType === 'consult' ? 'Health Consult History' : 'ClinAssist History';
+            }
+            try {
+                const response = await fetch(`/sessions?session_type=${sessionType}`);
+                const data = await response.json();
+
+                if (data.sessions && data.sessions.length > 0) {
+                    list.innerHTML = data.sessions.map(s => `
+                        <div class="history-item ${s.id === activeSessionId ? 'active' : ''}" onclick="switchToSession('${s.id}')">
+                            <div class="history-item-header">
+                                <div class="history-date">${new Date(s.created_at).toLocaleString()}</div>
+                                <button class="btn-delete-session" onclick="deleteSession(event, '${s.id}')" title="Delete Session">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"></path></svg>
+                                </button>
+                            </div>
+                            <div class="history-complaint" title="${sessionType === 'consult' ? (s.chief_complaint || 'Health Consult conversation') : (s.chief_complaint || 'Ongoing intake session...')}">${sessionType === 'consult' ? (s.chief_complaint || 'Health Consult conversation') : (s.chief_complaint || 'Ongoing intake session...')}</div>
+                            <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 0.25rem;">ID: ${s.id.substring(0, 8)}... [${s.state}]</div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<div style="text-align: center; color: #64748b; padding: 2rem;">No previous sessions found.</div>';
+                }
+            } catch (error) {
+                console.error('Failed to load history:', error);
+                list.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 2rem;">Error loading history.</div>';
+            }
+        }
+
+        async function switchToSession(id) {
+            const isConsult = getActiveTabType() === 'consult';
+            const currentSessionId = isConsult ? consultSessionId : sessionId;
+
+            if (id === currentSessionId) {
+                return;
+            }
+
+            try {
+                if (!isConsult) {
+                    showLoading(true);
+                }
+                const response = await fetch(`/session/${id}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (isConsult) {
+                        consultSessionId = id;
+                        const consultMessages = document.getElementById('consultMessages');
+                        if (consultMessages) {
+                            consultMessages.innerHTML = '';
+                            data.conversation_history.forEach(turn => {
+                                const msg = document.createElement('div');
+                                msg.className = `assistant-msg ${turn.role === 'user' ? 'user' : 'bot'}`;
+                                msg.textContent = turn.content;
+                                consultMessages.appendChild(msg);
+                            });
+                            consultMessages.scrollTop = consultMessages.scrollHeight;
+                        }
+                    } else {
+                        sessionId = id;
+                        resetUI();
+
+                        // Reconstruct conversation
+                        data.conversation_history.forEach(turn => {
+                            addMessage(turn.role, turn.content);
+                        });
+
+                        // Show completion elements if applicable
+                        if (data.state === 'complete') {
+                            if (data.risk_assessment) {
+                                showRiskBadge(data.risk_assessment);
+                            }
+                            if (data.wellness_tip) {
+                                addWellnessTip(data.wellness_tip);
+                            }
+                            document.getElementById('exportSection').classList.add('active');
+                        }
+                        // Apply UI state based on the loaded session's state
+                        setStatus(data.state || 'ready', data.state === 'complete' ? 'Session Complete' : 'Ready');
+                    }
+
+                    updateSessionDisplay();
+                    const sidebar = document.getElementById('historySidebar');
+                    const overlay = document.getElementById('historyOverlay');
+                    if (sidebar && overlay) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                } else {
+                    alert('Failed to load session: ' + data.detail?.error);
+                }
+            } catch (error) {
+                console.error('Failed to switch session:', error);
+                alert('Connection error while switching session.');
+            } finally {
+                if (!isConsult) {
+                    showLoading(false);
+                }
+            }
+        }
+
+        async function deleteSession(event, deleteId) {
+            // Prevent the click from triggering switchToSession
+            event.stopPropagation();
+
+            if (!confirm('Are you sure you want to delete this session? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/session/${deleteId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    const isConsult = getActiveTabType() === 'consult';
+                    const currentSessionId = isConsult ? consultSessionId : sessionId;
+
+                    // If we deleted the active session, clear the screen
+                    if (deleteId === currentSessionId) {
+                        if (isConsult) {
+                            consultSessionId = null;
+                            document.getElementById('consultMessages').innerHTML = '<div class="assistant-msg bot">Hello! I\'m your Health Consult Assistant. Let me know if you have any questions.</div>';
+                        } else {
+                            sessionId = null;
+                            resetUI();
+                        }
+                        updateSessionDisplay();
+                    }
+
+                    // Reload the history list
+                    loadHistory();
+                } else {
+                    const data = await response.json();
+                    alert('Failed to delete session: ' + data.detail?.error);
+                }
+            } catch (error) {
+                console.error('Error deleting session:', error);
+                alert('Connection error while trying to delete session.');
+            }
+        }
+
+        function resetUI() {
+            // Clear messages
+            const messagesDiv = document.getElementById('messages');
+            if (messagesDiv) messagesDiv.innerHTML = '';
+
+            // Clear risk badge
+            const riskBadge = document.getElementById('riskBadgeContainer');
+            if (riskBadge) riskBadge.innerHTML = '';
+
+            // Hide export
+            const exportSect = document.getElementById('exportSection');
+            if (exportSect) exportSect.classList.remove('active');
+
+            // Reset input area
+            setStatus('ready', 'Ready');
+
+            // Update session ID display
+            updateSessionDisplay();
+            loadHistory();
+        }
+
+        async function startSession() {
+            hasConversationStarted = true;
+
+            // Check if we're in the Health Consult tab
+            if (document.getElementById('tab-consult').classList.contains('active')) {
+                consultSessionId = null;
+                inheritIntakeContext = false; // Manually starting new = no inheritance
+
+                // Reset Health Consult View
+                document.getElementById('consultMessages').innerHTML = '<div class="assistant-msg bot">Hello! I\'m your Health Consult Assistant. How can I help you today?</div>';
+                updateSessionDisplay();
+
+                // Re-trigger the vocal greeting
+                speakFallback("Hello! I'm your Health Consult Assistant. How can I help you today?");
+                window.consultGreeted = true;
+                return;
+            }
+
+            try {
+                setStatus('processing', 'Starting session');
+                const response = await fetch('/session/new', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                sessionId = data.session_id;
+
+                resetUI();
+                setStatus('ready', 'Ready');
+
+                // Send initial greeting to trigger state machine
+                isVoiceMode = false; // Reset voice mode on new intake
+                await sendText('');
+            } catch (error) {
+                console.error('Failed to start session:', error);
+                setStatus('processing', 'Start failed');
+                alert('Failed to start session. Please try again.');
+            }
+        }
+
+        function toggleMic() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        async function startRecording() {
+            if (!hasConversationStarted) {
+                alert('Press New to start a conversation first.');
+                return;
+            }
+
+            if (isRecording || !sessionId) return;
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                isRecording = true;
+
+                document.getElementById('micBtn').classList.add('recording');
+                setStatus('listening', 'Listening...');
+
+                mediaRecorder.addEventListener('dataavailable', event => {
+                    audioChunks.push(event.data);
+                });
+
+                mediaRecorder.start();
+            } catch (error) {
+                console.error('Microphone access denied:', error);
+                alert('Please allow microphone access to use voice input.');
+            }
+        }
+
+        async function stopRecording() {
+            if (!isRecording || !mediaRecorder) return;
+
+            isRecording = false;
+            isVoiceMode = true; // User started with voice, keep it in voice mode
+            document.getElementById('micBtn').classList.remove('recording');
+            setStatus('processing', 'Processing audio...');
+
+            mediaRecorder.addEventListener('stop', async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                await convertAndSendAudio(audioBlob);
+
+                // Stop all tracks
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            });
+
+            mediaRecorder.stop();
+        }
+
+        async function convertAndSendAudio(audioBlob) {
+            showLoading(true);
+
+            try {
+                // Convert to WAV format
+                const wavBlob = await convertToWav(audioBlob);
+
+                // Send to backend
+                const formData = new FormData();
+                formData.append('audio', wavBlob, 'audio.wav');
+
+                const response = await fetch(`/session/${sessionId}/voice`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    handleResponse(data);
+                } else {
+                    const errorMsg = data.detail?.error || 'Failed to process audio';
+                    console.error('Audio processing error details:', data.detail);
+                    alert('Error: ' + errorMsg);
+                }
+            } catch (error) {
+                console.error('Audio processing failed:', error);
+                alert('Failed to process audio. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function convertToWav(blob) {
+            // Create audio context
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            // Decode audio data
+            const arrayBuffer = await blob.arrayBuffer();
+            if (arrayBuffer.byteLength === 0) {
+                throw new Error("Empty audio buffer");
+            }
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+            // Resample to 16kHz mono
+            const targetSampleRate = 16000;
+            const offlineContext = new OfflineAudioContext(1, audioBuffer.duration * targetSampleRate, targetSampleRate);
+            const source = offlineContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(offlineContext.destination);
+            source.start();
+
+            const resampledBuffer = await offlineContext.startRendering();
+
+            // Convert to WAV
+            return audioBufferToWav(resampledBuffer);
+        }
+
+        function audioBufferToWav(buffer) {
+            const numChannels = 1;
+            const sampleRate = buffer.sampleRate;
+            const format = 1; // PCM
+            const bitDepth = 16;
+
+            const samples = buffer.getChannelData(0);
+            const dataLength = samples.length * 2;
+            const wavBuffer = new ArrayBuffer(44 + dataLength);
+            const view = new DataView(wavBuffer);
+
+            // WAV header
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataLength, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true); // fmt chunk size
+            view.setUint16(20, format, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * numChannels * 2, true); // byte rate
+            view.setUint16(32, numChannels * 2, true); // block align
+            view.setUint16(34, bitDepth, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataLength, true);
+
+            // PCM samples
+            let offset = 44;
+            for (let i = 0; i < samples.length; i++) {
+                const sample = Math.max(-1, Math.min(1, samples[i]));
+                view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                offset += 2;
+            }
+
+            return new Blob([wavBuffer], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        // --- CONSULT SPECIFIC RECORDING LOGIC ---
+        let isConsultRecording = false;
+        let consultMediaRecorder;
+        let consultAudioChunks = [];
+        let consultRecordTimeout;
+
+        function toggleConsultMic() {
+            if (isConsultRecording) {
+                stopConsultRecording();
+            } else {
+                startConsultRecording();
+            }
+        }
+
+        async function startConsultRecording() {
+            if (isConsultRecording) return;
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                consultMediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                consultAudioChunks = [];
+
+                consultMediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) consultAudioChunks.push(event.data);
+                };
+
+                consultMediaRecorder.onstop = () => {
+                    if (consultAudioChunks.length > 0) {
+                        const webmBlob = new Blob(consultAudioChunks, { type: 'audio/webm' });
+                        // Use the existing convertToWav if possible, or just send directly
+                        convertToWav(webmBlob).then(wavBlob => {
+                            convertAndSendConsultAudio(wavBlob);
+                        }).catch(err => {
+                            console.error("Resampling failed, sending webm fallback", err);
+                            convertAndSendConsultAudio(webmBlob);
+                        });
+                    }
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                consultMediaRecorder.start(100);
+                isConsultRecording = true;
+
+                const btn = document.getElementById('consultMicBtn');
+                btn.classList.add('recording');
+                btn.parentElement.classList.add('recording');
+
+                consultRecordTimeout = setTimeout(stopConsultRecording, 30000); // 30s max
+            } catch (err) {
+                console.error("Consult mic access denied:", err);
+                alert("Please allow microphone access to use voice questions.");
+            }
+        }
+
+        function stopConsultRecording() {
+            if (!isConsultRecording || !consultMediaRecorder) return;
+            clearTimeout(consultRecordTimeout);
+            consultMediaRecorder.stop();
+            isConsultRecording = false;
+
+            const btn = document.getElementById('consultMicBtn');
+            btn.classList.remove('recording');
+            btn.parentElement.classList.remove('recording');
+        }
+
+        async function convertAndSendConsultAudio(audioBlob) {
+            const loading = document.getElementById('consultLoading');
+            loading.classList.add('active');
+
+            try {
+                // The backend endpoint /consult/voice expects an 'audio' file upload
+                const file = new File([audioBlob], "consult_audio" + (audioBlob.type.includes('wav') ? '.wav' : '.webm'), { type: audioBlob.type });
+
+                const formData = new FormData();
+                formData.append('audio', file);
+                if (consultSessionId) {
+                    formData.append('session_id', consultSessionId);
+                }
+                if (inheritIntakeContext && sessionId) {
+                    formData.append('context_session_id', sessionId);
+                }
+
+                const response = await fetch(`/consult/voice`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail?.error || "Voice process failed");
+                }
+
+                // Save session ID for conversation memory
+                if (data.session_id) {
+                    consultSessionId = data.session_id;
+                    updateSessionDisplay();
+                }
+
+                const messagesDiv = document.getElementById('consultMessages');
+
+                // Transcribed user message
+                if (data.transcript) {
+                    const userMsg = document.createElement('div');
+                    userMsg.className = 'assistant-msg user';
+                    userMsg.textContent = data.transcript;
+                    messagesDiv.appendChild(userMsg);
+                }
+
+                // AI Response
+                if (data.answer) {
+                    const botMsg = document.createElement('div');
+                    botMsg.className = 'assistant-msg bot';
+                    botMsg.textContent = data.answer;
+                    messagesDiv.appendChild(botMsg);
+                }
+
+                // Audio playback
+                if (data.audio_base64) {
+                    playAudio(data.audio_base64);
+                } else if (data.answer) {
+                    speakFallback(data.answer);
+                }
+
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            } catch (error) {
+                console.error('Consult voice failed:', error);
+                const messagesDiv = document.getElementById('consultMessages');
+                const errMsg = document.createElement('div');
+                errMsg.className = 'assistant-msg bot';
+                errMsg.textContent = "Sorry, I had trouble processing your voice request.";
+                messagesDiv.appendChild(errMsg);
+            } finally {
+                loading.classList.remove('active');
+                // Update Latency (Consult Voice placeholder)
+                updateLatencyDashboard({
+                    stt_ms: data && data.transcript ? "Processed" : "--",
+                    llm_ms: "N/A",
+                    tts_ms: data && data.audio_base64 ? "Generated" : "--",
+                    total_ms: "N/A"
+                });
+            }
+        }
+        // --- END CONSULT SPECIFIC RECORDING LOGIC ---
+
+        async function sendText(text = null) {
+            if (text === null) isVoiceMode = false; // User typed manually, disable auto-listen
+            if (!hasConversationStarted) {
+                alert('Press New to start a conversation first.');
+                return;
+            }
+
+            const input = document.getElementById('textInput');
+            const message = text !== null ? text : input.value.trim();
+
+            if (!sessionId) {
+                alert('Press New to start a conversation first.');
+                return;
+            }
+
+            if (!message && text === null) return;
+
+            if (text === null) {
+                input.value = '';
+            }
+
+            showLoading(true);
+
+            try {
+                const response = await fetch(`/session/${sessionId}/text`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: message || '' })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    handleResponse(data);
+                } else {
+                    alert('Error: ' + (data.detail?.error || 'Failed to process text'));
+                }
+            } catch (error) {
+                console.error('Text processing failed:', error);
+                alert('Failed to process text. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function handleResponse(data) {
+            console.log("DEBUG: Received response data:", data);
+
+            // Update Latency Dashboard
+            if (data.latency_breakdown) {
+                updateLatencyDashboard(data.latency_breakdown);
+            }
+
+            // Add user message if transcript exists
+            if (data.transcript) {
+                addMessage('user', data.transcript);
+            }
+
+            // Add assistant response
+            addMessage('assistant', data.response_text);
+            setStatus('ready', 'Ready');
+
+            // NEW: Show wellness tip if present
+            if (data.wellness_tip) {
+                console.log("DEBUG: Adding wellness tip block");
+                addWellnessTip(data.wellness_tip);
+            }
+
+            // Render interactive buttons for the Consult offer
+            const doubtButtons = document.getElementById('consultDoubtButtons');
+            const inputContainer = document.getElementById('intakeInputContainer');
+
+            if (data.state === 'offering_consult') {
+                if (doubtButtons) doubtButtons.style.display = 'flex';
+                if (inputContainer) inputContainer.style.display = 'none';
+            } else {
+                if (doubtButtons) doubtButtons.style.display = 'none';
+                if (inputContainer) inputContainer.style.display = 'flex';
+                // Ensure text input is focused and usable
+                const textInput = document.getElementById('textInput');
+                if (textInput) {
+                    textInput.disabled = false;
+                    setTimeout(() => textInput.focus(), 100);
+                }
+            }
+
+            // NEW: Show risk badge as soon as it's available (QA or COMPLETE)
+            if (data.risk_assessment) {
+                console.log("DEBUG: Showing risk badge");
+                showRiskBadge(data.risk_assessment);
+                document.getElementById('exportSection').classList.add('active');
+            }
+
+            // Show interactive blocks if complete
+            if (data.is_complete) {
+                console.log("DEBUG: Session is complete, adding interactive blocks");
+                // NEW: Add interactive block for summary
+                document.getElementById('exportSection').classList.add('active');
+
+                if (data.show_report_popup) {
+                    setTimeout(() => viewSummaryReport(), 1500);
+                }
+            }
+
+            // Transition logic for Health Consult doubt clarification
+            if (data.trigger_consult_transition) {
+                setTimeout(() => {
+                    switchMainTab('consult');
+                    consultSessionId = sessionId; // Inherit existing session context
+
+                    // Display a greeting instead of automatically firing off their "yes" text
+                    const messagesDiv = document.getElementById('consultMessages');
+                    messagesDiv.innerHTML = '';
+
+                    const botMsg = document.createElement('div');
+                    botMsg.className = 'assistant-msg bot';
+                    const greetingText = "Hello! I have your symptom history from the intake. What questions do you have?";
+                    botMsg.textContent = greetingText;
+                    messagesDiv.appendChild(botMsg);
+
+                    speakFallback(greetingText);
+
+                    // Specific flag for inheritance only in this flow
+                    inheritIntakeContext = true;
+                    isVoiceMode = false; // Disable intake's auto-listen once we switch to Consult
+                }, 1500);
+            }
+
+            // Auto-listen logic: If we are in voice mode and not complete, start recording after speech finishes
+            const nextAction = () => {
+                if (isVoiceMode && !data.is_complete && data.state !== 'offering_consult') {
+                    setTimeout(() => startRecording(), 500);
+                }
+            };
+
+            // Play audio response
+            if (data.audio_base64) {
+                playAudio(data.audio_base64, nextAction);
+            } else if (data.response_text) {
+                speakFallback(data.response_text, nextAction);
+            }
+        }
+
+        function updateLatencyDashboard(breakdown) {
+            const sttEl = document.getElementById('sttLatency');
+            const llmEl = document.getElementById('llmLatency');
+            const ttsEl = document.getElementById('ttsLatency');
+            const totalEl = document.getElementById('totalLatency');
+
+            if (!sttEl || !llmEl || !ttsEl || !totalEl) return;
+
+            if (breakdown.stt_ms !== undefined) {
+                const isProcessed = breakdown.stt_ms === "Processed";
+                sttEl.textContent = isProcessed ? "Processed" : (breakdown.stt_ms ? `${Math.round(breakdown.stt_ms)}ms` : '--');
+                sttEl.classList.remove('cached');
+            }
+
+            if (breakdown.llm_ms !== undefined) {
+                const isNA = breakdown.llm_ms === "N/A";
+                llmEl.textContent = isNA ? "N/A" : (breakdown.llm_ms ? `${Math.round(breakdown.llm_ms)}ms` : '--');
+            }
+
+            if (breakdown.tts_ms !== undefined) {
+                const isGen = breakdown.tts_ms === "Generated";
+                const isCached = (breakdown.tts_ms < 50 && breakdown.tts_ms > 0) && !isGen;
+                const val = isGen ? "Generated" : (breakdown.tts_ms ? `${Math.round(breakdown.tts_ms)}ms` : '--');
+                ttsEl.textContent = val;
+                if (isCached) {
+                    ttsEl.textContent += " (Cached)";
+                    ttsEl.classList.add('cached');
+                } else {
+                    ttsEl.classList.remove('cached');
+                }
+            }
+
+            if (breakdown.total_ms !== undefined) {
+                const isNA = breakdown.total_ms === "N/A";
+                totalEl.textContent = isNA ? "N/A" : (breakdown.total_ms ? `${Math.round(breakdown.total_ms)}ms` : '--');
+            }
+        }
+
+        function addMessage(role, content) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = content;
+
+            messageDiv.appendChild(bubble);
+            messagesDiv.appendChild(messageDiv);
+
+            // Scroll to bottom
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addWellnessTip(content) {
+            const messagesDiv = document.getElementById('messages');
+
+            // Remove any existing wellness tips to prevent duplicates
+            const existingTips = messagesDiv.querySelectorAll('.wellness-tip');
+            existingTips.forEach(tip => tip.remove());
+
+            const tipDiv = document.createElement('div');
+            tipDiv.className = 'wellness-tip';
+
+            // Check if it's a "warning" tip based on keywords
+            const isWarning = content.toLowerCase().includes("prioritize") || content.toLowerCase().includes("medical evaluation") || content.toLowerCase().includes("urgent");
+            const title = isWarning ? "Care Recommendation" : "Wellness Tip";
+            const iconColor = isWarning ? "#ef4444" : "#22c55e"; // Red for warning, green for wellness
+            const bgColor = isWarning ? "#fef2f2" : "#f0fdf4";
+            const borderColor = isWarning ? "#fecaca" : "#bbf7d0";
+            const textColor = isWarning ? "#991b1b" : "#166534";
+
+            tipDiv.style.backgroundColor = bgColor;
+            tipDiv.style.borderColor = borderColor;
+            tipDiv.style.color = textColor;
+
+            tipDiv.innerHTML = `
+                <svg viewBox="0 0 24 24" style="fill: ${iconColor}"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                <div><strong>${title}:</strong> ${content}</div>
+            `;
+            messagesDiv.appendChild(tipDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function switchMainTab(tabId) {
+            // Update Tab styling
+            document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            // Update View content
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${tabId}`).classList.add('active');
+
+            // Isolation logic: If manually switching to consult, clear inheritance context
+            if (tabId === 'consult') {
+                // If we aren't coming from a doubt button transition (which sets this), clear it
+                // Note: We'll check if the current messages are the default greeting
+                const consultMsgs = document.getElementById('consultMessages');
+                if (consultMsgs && consultMsgs.children.length <= 1) {
+                    consultSessionId = null;
+                    inheritIntakeContext = false;
+                }
+                isVoiceMode = false; // Stop intake auto-listen
+            }
+
+            // Update Header Text dynamically based on active tab
+            const appTitle = document.getElementById('appTitle');
+            const appSubtitle = document.getElementById('appSubtitle');
+            const appDisclaimer = document.getElementById('appDisclaimer');
+            const headerActions = document.getElementById('headerActions');
+            const sessionDisplay = document.getElementById('sessionIdDisplay');
+
+            // Focus appropriate input
+            if (tabId === 'intake') {
+                if (appTitle) appTitle.textContent = 'ClinAssist';
+                if (appSubtitle) appSubtitle.textContent = 'Clinical intake assistant for structured symptom capture';
+                if (appDisclaimer) appDisclaimer.textContent = 'A structured pre-screening support tool designed to organize symptoms before a doctor visit.';
+                if (headerActions) headerActions.style.display = 'flex';
+                if (sessionDisplay) sessionDisplay.style.display = 'block';
+                document.getElementById('textInput').focus();
+            } else if (tabId === 'consult') {
+                if (appTitle) appTitle.textContent = 'Health Consult';
+                if (appSubtitle) appSubtitle.textContent = 'Your AI-powered virtual health assistant';
+                if (appDisclaimer) appDisclaimer.textContent = 'Ask general health, fitness, and nutrition questions. For medical emergencies, call a doctor immediately.';
+                if (headerActions) headerActions.style.display = 'flex';
+                if (sessionDisplay) sessionDisplay.style.display = 'block';
+                document.getElementById('consultInput').focus();
+            }
+
+            updateSessionDisplay();
+        }
+
+        async function sendConsult() {
+            if (!hasConversationStarted) {
+                alert('Press New to start a conversation first.');
+                return;
+            }
+
+            const input = document.getElementById('consultInput');
+            const question = input.value.trim();
+            if (!question) return;
+
+            const messagesDiv = document.getElementById('consultMessages');
+            const loading = document.getElementById('consultLoading');
+
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'assistant-msg user';
+            userMsg.textContent = question;
+            messagesDiv.appendChild(userMsg);
+
+            input.value = '';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // Show loading
+            loading.classList.add('active');
+
+            try {
+                // Keep consult history in consultSessionId, optionally pass intake context
+                const payload = { question: question };
+                if (consultSessionId) {
+                    payload.session_id = consultSessionId;
+                }
+                if (inheritIntakeContext && sessionId) {
+                    payload.context_session_id = sessionId;
+                }
+
+                const response = await fetch(`/consult`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                // Save session ID for conversation memory
+                if (data.session_id) {
+                    consultSessionId = data.session_id;
+                    updateSessionDisplay();
+                }
+
+                // Add bot response
+                const botMsg = document.createElement('div');
+                botMsg.className = 'assistant-msg bot';
+                botMsg.textContent = data.answer || "I'm sorry, I couldn't process that.";
+                messagesDiv.appendChild(botMsg);
+
+                // Play audio if available
+                if (data.audio_base64) {
+                    playAudio(data.audio_base64);
+                } else if (data.answer) {
+                    speakFallback(data.answer);
+                }
+
+            } catch (error) {
+                console.error('Consult failed:', error);
+                const errMsg = document.createElement('div');
+                errMsg.className = 'assistant-msg bot';
+                errMsg.textContent = "Sorry, I had trouble connecting to the Health Consult service.";
+                messagesDiv.appendChild(errMsg);
+            } finally {
+                loading.classList.remove('active');
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('summaryModal').classList.remove('active');
+        }
+
+        async function viewSummaryReport() {
+            if (!sessionId) return;
+            try {
+                showLoading(true);
+                const response = await fetch(`/session/${sessionId}/summary`);
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail?.error || 'Failed to fetch summary');
+
+                const record = data.symptom_record;
+                const risk = data.risk_assessment;
+                const summary = data.summary || "Summary not generated.";
+
+                // Parse summary into sections if it has headers (using basic replacement for now)
+                const formattedSummary = summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+                let reportHtml = `
+                    <div id="reportContainer" style="background: white; padding: 2rem; border-radius: 0; border: 1px solid #dbe7ff; width: 100%; min-height: 620px; box-sizing: border-box;">
+                        <div class="report-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+                            <h1 style="color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem; margin-bottom: 0; font-size: 1.5rem;">CLINICAL SUMMARY REPORT</h1>
+                            <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 0.5rem;">Session: ${sessionId} | Date: ${new Date().toLocaleDateString()}</p>
+                        </div>
+                        
+                        <div class="report-grid three-col" style="margin-top: 2rem;">
+                            <!-- Top Row: Complaint, Risk, Associated -->
+                            <div class="report-box">
+                                <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Chief Complaint</h4>
+                                <div class="report-content" style="font-weight: 700; color: #1e3a8a; font-size: 1.1rem;">${record.chief_complaint || 'N/A'}</div>
+                            </div>
+                            
+                            <div class="report-box">
+                                <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Risk Status</h4>
+                                <div class="report-risk ${risk?.risk_level || 'LOW'}">${risk?.risk_level || 'LOW'} Priority</div>
+                            </div>
+                            
+                            <div class="report-box">
+                                <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Associated Symptoms</h4>
+                                <div class="report-content">
+                                    ${record.associated_symptoms ? (Array.isArray(record.associated_symptoms) ? record.associated_symptoms.join(', ') : record.associated_symptoms) : 'None reported'}
+                                </div>
+                            </div>
+
+                            <!-- Middle Row: HPI (Spans 3 cols) -->
+                            <div class="report-box" style="grid-column: span 3; margin-top: 1rem; background: #f0f7ff; border-color: #bfdbfe;">
+                                <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> AI Clinical Summary (HPI)</h4>
+                                <div class="report-content" style="font-style: italic; white-space: pre-line;">${formattedSummary}</div>
+                            </div>
+                            
+                            <!-- Bottom Row: Observations (Spans 3 cols, horizontal inner grid) -->
+                            <div class="report-box" style="grid-column: span 3; margin-top: 1rem;">
+                                <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Structured Observations</h4>
+                                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; border-top: none; padding-top: 0;">
+                                    <div><p style="font-size: 0.7rem; color: #64748b;">DURATION</p><p>${record.duration || 'N/A'}</p></div>
+                                    <div><p style="font-size: 0.7rem; color: #64748b;">SEVERITY</p><p>${record.severity ? record.severity + '/10' : 'N/A'}</p></div>
+                                    <div><p style="font-size: 0.7rem; color: #64748b;">PROGRESSION</p><p>${record.progression || 'N/A'}</p></div>
+                                    <div><p style="font-size: 0.7rem; color: #64748b;">ONSET</p><p>${record.onset_type || 'N/A'}</p></div>
+                                    <div><p style="font-size: 0.7rem; color: #64748b;">LOCATION</p><p>${record.affected_body_part || 'N/A'}</p></div>
+                                    <div><p style="font-size: 0.7rem; color: #64748b;">HISTORY</p><p>${record.relevant_medical_history || 'N/A'}</p></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; font-size: 0.75rem; color: #94a3b8; text-align: center;">
+                            CONFIDENTIAL MEDICAL RECORD | GENERATED BY CLINASSIST AI
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('modalBody').innerHTML = reportHtml;
+                document.getElementById('summaryModal').classList.add('active');
+            } catch (error) {
+                console.error('Failed to fetch summary:', error);
+                alert('Could not load summary report: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function downloadReportAsImage() {
+            const report = document.getElementById('reportContainer');
+            if (!report) return;
+
+            showLoading(true);
+            html2canvas(report, {
+                scale: 2, // Better quality
+                backgroundColor: '#ffffff',
+                logging: false,
+                width: 900, // Force a wide horizontal render for the image
+                windowWidth: 900,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `ClinAssist_Report_${sessionId.substring(0, 8)}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showLoading(false);
+            }).catch(err => {
+                console.error('Snapshot failed:', err);
+                alert('Failed to generate image report.');
+                showLoading(false);
+            });
+        }
+
+        function showRiskBadge(riskAssessment) {
+            const container = document.getElementById('riskBadgeContainer');
+            container.innerHTML = `
+                <div class="risk-badge ${riskAssessment.risk_level}">
+                    ${riskAssessment.risk_level} Priority
+                </div>
+                <p style="color: #6B7280; font-size: 0.875rem; margin-bottom: 1.5rem;">
+                    ${riskAssessment.recommended_action}
+                </p>
+            `;
+        }
+
+        function setAudioToggleButtonState(isPlaying) {
+            const intakeBtn = document.getElementById('audioToggleBtn');
+            const consultBtn = document.getElementById('consultAudioToggleBtn');
+            const IntakePause = document.getElementById('iconPause');
+            const IntakePlay = document.getElementById('iconPlay');
+            const ConsultPause = document.getElementById('iconConsultPause');
+            const ConsultPlay = document.getElementById('iconConsultPlay');
+
+            if (isPlaying) {
+                // Show pause icon, hide play icon
+                if (IntakePause) IntakePause.style.display = 'block';
+                if (IntakePlay) IntakePlay.style.display = 'none';
+                if (ConsultPause) ConsultPause.style.display = 'block';
+                if (ConsultPlay) ConsultPlay.style.display = 'none';
+            } else {
+                // Show play icon, hide pause icon
+                if (IntakePause) IntakePause.style.display = 'none';
+                if (IntakePlay) IntakePlay.style.display = 'block';
+                if (ConsultPause) ConsultPause.style.display = 'none';
+                if (ConsultPlay) ConsultPlay.style.display = 'block';
+            }
+        }
+
+        function toggleAudio() {
+            if (currentHTMLAudio) {
+                if (isAudioPaused) {
+                    currentHTMLAudio.play();
+                    isAudioPaused = false;
+                    setStatus('speaking', 'Speaking...');
+                    setAudioToggleButtonState(true);
+                } else {
+                    currentHTMLAudio.pause();
+                    isAudioPaused = true;
+                    setStatus('ready', 'Paused');
+                    setAudioToggleButtonState(false);
+                }
+            } else if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                    isSynthPaused = false;
+                    setStatus('speaking', 'Speaking...');
+                    setAudioToggleButtonState(true);
+                } else {
+                    window.speechSynthesis.pause();
+                    isSynthPaused = true;
+                    setStatus('ready', 'Paused');
+                    setAudioToggleButtonState(false);
+                }
+            }
+        }
+
+        function showAudioControls() {
+            const intakeBtn = document.getElementById('audioToggleBtn');
+            const consultBtn = document.getElementById('consultAudioToggleBtn');
+            if (intakeBtn) intakeBtn.style.display = 'flex';
+            if (consultBtn) consultBtn.style.display = 'flex';
+            setAudioToggleButtonState(true); // default to playing state (pause icon shown)
+            isAudioPaused = false;
+            isSynthPaused = false;
+        }
+
+        function hideAudioControls() {
+            const intakeBtn = document.getElementById('audioToggleBtn');
+            const consultBtn = document.getElementById('consultAudioToggleBtn');
+            if (intakeBtn) intakeBtn.style.display = 'none';
+            if (consultBtn) consultBtn.style.display = 'none';
+        }
+
+        function playAudio(base64Audio, callback = null) {
+            // Stop any existing playback
+            if (currentHTMLAudio) {
+                currentHTMLAudio.pause();
+                currentHTMLAudio = null;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+
+            setStatus('speaking', 'Speaking...');
+            showAudioControls();
+
+            const audio = new Audio('data:audio/mpeg;base64,' + base64Audio);
+            currentHTMLAudio = audio;
+
+            audio.onended = () => {
+                setStatus('ready', 'Ready');
+                hideAudioControls();
+                currentHTMLAudio = null;
+                if (callback) callback();
+            };
+
+            audio.play().catch(error => {
+                console.error('Audio playback failed:', error);
+                hideAudioControls();
+                if (!autoplayBlockedNoticeShown) {
+                    autoplayBlockedNoticeShown = true;
+                    console.warn('Autoplay blocked or failed. Falling back to browser speech synthesis.');
+                }
+                setStatus('ready', 'Ready');
+                const lastAssistant = document.querySelector('.message.assistant:last-child .message-bubble');
+                if (lastAssistant && lastAssistant.textContent) {
+                    speakFallback(lastAssistant.textContent);
+                }
+            });
+        }
+
+        function speakFallback(text, callback = null) {
+            if (!('speechSynthesis' in window) || !text) return;
+
+            try {
+                // Stop any existing playback
+                if (currentHTMLAudio) {
+                    currentHTMLAudio.pause();
+                    currentHTMLAudio = null;
+                }
+
+                setStatus('speaking', 'Speaking...');
+                window.speechSynthesis.cancel();
+                showAudioControls();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                utterance.onend = () => {
+                    setStatus('ready', 'Ready');
+                    hideAudioControls();
+                    if (callback) callback();
+                };
+                window.speechSynthesis.speak(utterance);
+            } catch (error) {
+                console.error('Speech synthesis fallback failed:', error);
+                setStatus('ready', 'Ready');
+                hideAudioControls();
+            }
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const chatContainer = document.getElementById('chatContainer');
+            if (show) {
+                loading.classList.add('active');
+                chatContainer.classList.add('processing');
+                if (!isRecording) {
+                    setStatus('processing', 'Processing...');
+                }
+            } else {
+                loading.classList.remove('active');
+                chatContainer.classList.remove('processing');
+            }
+        }
+
+        function setStatus(mode, text) {
+            const statusChip = document.getElementById('statusChip');
+            const statusText = document.getElementById('statusText');
+            if (!statusChip || !statusText) return;
+
+            statusChip.className = `status-chip status-${mode}`;
+            statusText.textContent = text;
+        }
+
+        async function exportSession() {
+            if (!sessionId) return;
+
+            try {
+                const response = await fetch(`/session/${sessionId}/export`);
+                const text = await response.text();
+
+                // Create download
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `clinassist_session_${sessionId}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export session. Please try again.');
+            }
+        }
+
+        // Enter key listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const textInput = document.getElementById('textInput');
+            textInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendText();
+                }
+            });
+
+            const consultInput = document.getElementById('consultInput');
+            if (consultInput) {
+                consultInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendConsult();
+                    }
+                });
+            }
+
+            updateSessionDisplay();
+            loadHistory();
+
+        });
+    </script>
+</body>
+
+</html>

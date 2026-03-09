@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Environment
+.env
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Audio Output & Cache
+audio_output/
+audio_cache/
+
+# Models (Local ONNX) in assets/
+assets/*.onnx
+assets/*.onnx.json
+
+# Evaluation
+eval/evaluation_samples/*.wav
+eval/evaluation_report.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
