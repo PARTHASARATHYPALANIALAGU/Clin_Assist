@@ -9,7 +9,7 @@ ClinAssist is an AI-powered medical intake assistant designed to automate the pr
 ## ✨ Features
 
 - **Voice-Native Interaction**: Hands-free clinical intake using frontend VAD (Voice Activity Detection) and high-accuracy STT (Speech-to-Text).
-- **Structured Data Extraction**: Automatically extracts 9 core clinical attributes from natural conversation using LLMs (Llama 3.1 / Gemini).
+- **Structured Data Extraction**: Automatically extracts 9 core clinical attributes from natural conversation using LLMs (Llama 3.1).
 - **Deterministic Risk Engine**: A rule-based safety layer that categorizes patient risk (Critical, High, Moderate, Low) based on severity and "Panic Keywords".
 - **Real-time Latency Telemetry**: Tracks performance metrics for STT, LLM, and TTS to ensure a responsive user experience.
 - **Local TTS Synthesis**: Uses Piper (ONNX) for sub-300ms speech synthesis with zero cloud dependency for audio generation.
@@ -23,7 +23,7 @@ ClinAssist is an AI-powered medical intake assistant designed to automate the pr
 |-----------|------------|
 | **Backend** | Python 3.11+, FastAPI, SQLite |
 | **STT (Ear)** | OpenAI Whisper-1 (via Nexus API) |
-| **LLM (Brain)** | Llama 3.1 8B (Groq) / Gemini 2.5 Flash |
+| **LLM (Brain)** | Llama 3.1 8B (Groq) |
 | **TTS (Voice)**| Piper (Local ONNX) |
 | **Frontend** | Vanilla JS, HTML5, CSS3 |
 
@@ -53,8 +53,8 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory:
 ```env
 NEXUS_API_KEY=your_nexus_api_key
-NEXUS_BASE_URL=https://your-nexus-endpoint.com
-GROQ_API_KEY=your_groq_api_key  # Optional, for Llama-based extraction
+NEXUS_BASE_URL=your_nexus_base_url
+GROQ_API_KEY=your_groq_api_key  
 ```
 
 ### 4. Running the App
