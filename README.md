@@ -33,13 +33,13 @@ ClinAssist is an AI-powered medical intake assistant designed to automate the pr
 
 ### 1. Prerequisites
 - Python 3.11 or higher
-- [FFmpeg](https://ffmpeg.org/) (for audio processing)
+
 
 ### 2. Installation
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/clinassist.git
-cd clinassist
+git clone https://github.com/PARTHASARATHYPALANIALAGU/Clin_Assist.git
+cd Clin_Assist
 
 # Create a virtual environment
 python -m venv .venv
