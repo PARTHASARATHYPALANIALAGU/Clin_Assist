@@ -82,6 +82,3 @@ Visit `http://localhost:8000` to start the intake.
 ClinAssist is an academic demonstration project. **It does not provide medical diagnosis, treatment advice, or prescriptions.** It is designed solely as a structured data collection tool to assist healthcare providers in triage workflows.
 
 ---
-
-## License
-Educational use only. See `LICENSE` for details (if applicable).
