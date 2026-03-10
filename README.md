@@ -1,4 +1,4 @@
-# ClinAssist 🩺
+# ClinAssist
 
 **Speech-Driven Structured Clinical Intake & Triage System**
 
@@ -6,7 +6,7 @@ ClinAssist is an AI-powered medical intake assistant designed to automate the pr
 
 ---
 
-## ✨ Features
+## Features
 
 - **Voice-Native Interaction**: Hands-free clinical intake using frontend VAD (Voice Activity Detection) and high-accuracy STT (Speech-to-Text).
 - **Structured Data Extraction**: Automatically extracts 9 core clinical attributes from natural conversation using LLMs (Llama 3.1).
@@ -17,7 +17,7 @@ ClinAssist is an AI-powered medical intake assistant designed to automate the pr
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
@@ -29,7 +29,7 @@ ClinAssist is an AI-powered medical intake assistant designed to automate the pr
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Prerequisites
 - Python 3.11 or higher
@@ -65,7 +65,7 @@ Visit `http://localhost:8000` to start the intake.
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 - `main.py`: FastAPI entry point and API endpoints.
 - `intake.py`: The State Machine managing the conversation flow.
@@ -77,11 +77,11 @@ Visit `http://localhost:8000` to start the intake.
 
 ---
 
-## 🚨 Safety & Disclaimer
+## Safety & Disclaimer
 
 ClinAssist is an academic demonstration project. **It does not provide medical diagnosis, treatment advice, or prescriptions.** It is designed solely as a structured data collection tool to assist healthcare providers in triage workflows.
 
 ---
 
-## 📜 License
+## License
 Educational use only. See `LICENSE` for details (if applicable).
